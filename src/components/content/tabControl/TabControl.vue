@@ -3,7 +3,7 @@
     <div class="tab-control-item"
          v-for="(item, index) in titles"
          :class="{active: currentIndex === index}"
-         @click="itemClick(index)">
+         @click="itemClick(index)" :key="item">
       <span>{{item}}</span>
     </div>
   </div>
@@ -16,7 +16,7 @@
       titles: {
         type: Array,
         default() {
-          return ['流行', '新款', '精选']
+          return []
         }
       }
     },
@@ -26,6 +26,7 @@
       }
     },
     methods: {
+      // 内部监听点击，发送你所点击的那个数据发送到父组件
       itemClick(index) {
         this.currentIndex = index
         this.$emit('tabClick', index)

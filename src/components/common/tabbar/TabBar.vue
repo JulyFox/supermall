@@ -1,8 +1,6 @@
 <template>
   <div id="tab-bar">
     <slot></slot>
-    <slot></slot>
-    
   </div>
 </template>
 
