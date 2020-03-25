@@ -40,7 +40,7 @@
       if (this.probeType === 2 || this.probeType === 3) {
         this.scroll.on('scroll', (position) => {
           // console.log(position);
-          this.$emit('scroll', position)//父子组件传值 子组件向父组件传一个scroll事件，参数为position
+          this.$emit('scroll', position)
         })
       }
 

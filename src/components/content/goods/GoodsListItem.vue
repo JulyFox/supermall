@@ -1,7 +1,7 @@
 <template>
   <div class="goods-item" @click="itemClick">
     <!-- <img @load="imgLoad" v-lazy="showImage" :key="showImage" alt=""> -->
-    <img :src="goodsItem.show.img" alt="" srcset="">
+    <img :src="goodsItem.show.img" @load="imgLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -27,15 +27,12 @@
       }
     },
     methods: {
-      itemClick() {
-        // 1.获取iid
-        const iid = this.goodsItem.iid;
-        // 2.跳转到详情页面
-        this.$router.push({path: '/detail', query: {iid}})
-      },
 	    imgLoad() {
-		    this.$bus.$emit('imgLoad')
-	    }
+		    this.$bus.$emit('itemImgLoad')//通过$bus.$emit('')向事件总线发射'imgLoad'事件
+      },
+      itemClick(){
+        this.$router.push('/detail/'+this.goodsItem.iid);
+      }
     }
   }
 </script>

@@ -1,19 +1,32 @@
 <template>
-  <div id="home">
+  <div id="home" class="wrapper">
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
+    <tab-control
+      :titles="['流行', '新款', '精选']"
+      @tabClick="tabClick"
+      class="tab-control"
+      ref="tabControl1"
+      v-show="istabTop"
+    />
     <scroll
       class="content"
       ref="scroll"
       :probe-type="3"
       @scroll="contentScroll"
       @pullingUp="loadMore"
+      :pull-up-load="true"
     >
-      <home-swiper :banners="banners" />
+      <home-swiper :banners="banners" @swiperLoad="swiperLoad" />
       <recommend-view :recommends="recommends" />
       <feture-view />
-      <tab-control :titles="['流行', '新款', '精选']" @tabClick="tabClick" class="tab-control" />
+      <tab-control
+        :titles="['流行', '新款', '精选']"
+        @tabClick="tabClick"
+        class="tab-control"
+        ref="tabControl"
+      />
       <goods-list :goods="showGoods" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -32,6 +45,7 @@ import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
 
 import { getHomeMultidata, getHomeGoods } from "network/home";
+import { debounce } from "common/utils";
 
 export default {
   name: "Home",
@@ -57,9 +71,10 @@ export default {
         sell: { page: 0, list: [] }
       },
       currentType: "pop",
-      dKeyword: [],
-      keywords: [],
-      isShowBackTop: false
+      isShowBackTop: false,
+      tabTopoff: 0,
+      istabTop: false,
+      saveY : 0
     };
   },
   computed: {
@@ -67,12 +82,35 @@ export default {
       return this.goods[this.currentType].list;
     }
   },
+  destroyed() {
+    console.log("destroyed");
+  },
+  deactivated() {//离开一个路由时的生命周期
+    console.log("deactivated")
+    this.saveY = this.$refs.scroll.getScrollY();//记录离开时的位置
+  },
+  activated() {//进入一个路由时生命周期函数
+    console.log("activated")
+    this.$refs.scroll.scrollTo(0, this.saveY, 0);
+    this.$refs.scroll.refresh();
+  },
   created() {
-    // 请求数据
+    //
+    // 1请求多个数据
     this.getHomeMultidata(),
+      // 请求商品数据
       this.getHomeGoods("pop"),
       this.getHomeGoods("new"),
       this.getHomeGoods("sell");
+  },
+  mounted() {
+    //DOM已经挂载
+    // 3 监听item中图片加载完成
+    const refresh = this.debounce(this.$refs.scroll.refresh, 50);
+    this.$bus.$on("itemImgLoad", () => {
+      //监听总线
+      refresh();
+    });
   },
   methods: {
     // 网络请求相关
@@ -89,15 +127,22 @@ export default {
       getHomeGoods(type, page).then(res => {
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
-
         // 完成上拉加载更多
         this.$refs.scroll.finishPullUp();
       });
     },
-
     // 事件监听相关
+    debounce(func, delay) {
+      let timer = null;
+      return function(...args) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          func.apply(this, args);
+        }, delay);
+      };
+    },
     tabClick(index) {
-      console.log(index);
+      // console.log(index);
       switch (index) {
         case 0:
           this.currentType = "pop";
@@ -114,10 +159,16 @@ export default {
       this.$refs.scroll.scrollTo(0, 0); //访问scroll组件的scrollTo()方法
     },
     contentScroll(position) {
-      if (-position.y > 1000) this.isShowBackTop = true;
+      this.isShowBackTop = -position.y > 1000;
+      this.istabTop = -position.y > this.tabTopoff;
     },
     loadMore() {
+      console.log("111");
       this.getHomeGoods(this.currentType);
+      console.log(this.currentType);
+    },
+    swiperLoad() {
+      this.tabTopoff = this.$refs.tabControl.$el.offsetTop; //监听子组件
     }
   }
 };
