@@ -1,6 +1,6 @@
 <template>
-  <swiper>
-    <swiper-item v-for="(item,k) in banners" :key="k">
+  <swiper ref="swiper" v-if="banners.length">
+    <swiper-item v-for="(item,index) in banners" :key="index">
       <a :href="item.link">
         <img :src="item.image" alt="" @load="imgLoad">
       </a>
@@ -31,12 +31,24 @@
       SwiperItem
     },
     methods: {
-      imgLoad(){
-        if(!this.isLoad){
-          this.$emit("swiperLoad");
-        this.isLoad = true;
-        } 
-      }
+      // imgLoad(){
+      //   if(!this.isLoad){
+      //     this.$emit("swiperLoad");
+      //   this.isLoad = true;
+      //   } 
+      // }
+      startTimer() {
+	      this.$refs.swiper && this.$refs.swiper.startTimer()
+      },
+      stopTimer() {
+        this.$refs.swiper && this.$refs.swiper.stopTimer()
+      },
+	    imgLoad() {
+      	if (!this.isLoaded) {
+      		this.$emit('swiperLoad')
+          this.isLoaded = true
+        }
+	    }
     }
   }
 </script>

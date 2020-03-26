@@ -107,7 +107,7 @@ export default {
     //DOM已经挂载
     // 3 监听item中图片加载完成
     const refresh = this.debounce(this.$refs.scroll.refresh, 50);
-    this.$bus.$on("itemImgLoad", () => {
+    this.$bus.$on("homeItemImgLoad", () => {
       //监听总线
       refresh();
     });

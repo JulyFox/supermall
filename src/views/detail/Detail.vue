@@ -8,7 +8,7 @@
       <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad" />
       <detail-param-info :param-info="paramsInfo" />
       <detail-comment-info :comment-info="commentInfo" />
-      <detail-recommend-info :recommend-info="recommendInfo" />
+      <!-- <detail-recommend-info :recommend-info="recommendInfo" /> -->
       <goods-list ref="recommend" :goods="goodsList"/>
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -30,6 +30,7 @@ import DetailBottomBar from "./childComps/DetailBottomBar";
 import BackTop from "components/content/backTop/BackTop";
 
 import GoodsList from 'components/content/goods/GoodsList'
+import { debounce } from "common/utils";
 
 export default {
   name: "Detail",
@@ -57,6 +58,7 @@ export default {
     DetailParamInfo,
     DetailCommentInfo,
     DetailBottomBar,
+    GoodsList,
     BackTop
   },
   created() {
@@ -67,6 +69,13 @@ export default {
     this._getDetail(this.iid);
     // 请求推荐
     this._getRecommend();
+  },
+  mounted(){
+    const refresh = this.debounce(this.$refs.scroll.refresh, 50);
+    this.$bus.$on("detailItemImgLoad", () => {
+      //监听总线
+      refresh();
+    });
   },
   methods: {
     _getDetail() {
@@ -99,7 +108,7 @@ export default {
     },
     _getRecommend() {
       getRecommend().then(res => {
-        this.goodsList = res.data.list[0];
+        this.goodsList = res.data.list;
       });
     },
     imageLoad() {

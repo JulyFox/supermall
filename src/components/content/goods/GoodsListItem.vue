@@ -28,7 +28,11 @@
     },
     methods: {
 	    imgLoad() {
-		    this.$bus.$emit('itemImgLoad')//通过$bus.$emit('')向事件总线发射'imgLoad'事件
+        if(this.$route.path.indexOf('/home')){
+          this.$bus.$emit('homeItemImgLoad')//通过$bus.$emit('')向事件总线发射'imgLoad'事件
+        }else if(this.$route.path.indexOf('/detail')){
+          this.$bus.$emit('detailItemImageLoad')
+        }
       },
       itemClick(){
         this.$router.push('/detail/'+this.goodsItem.iid);
